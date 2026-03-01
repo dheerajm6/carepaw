@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { TabPage } from '../components/PageTransition'
 import { Heart } from 'lucide-react'
 
 const FOOD_GUIDE = [
@@ -15,10 +15,7 @@ const FOOD_GUIDE = [
 
 export default function Care() {
   return (
-    <motion.div
-      className="fixed inset-0 flex flex-col bg-bg"
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-    >
+    <TabPage className="flex flex-col bg-bg">
       <div className="bg-white border-b border-border px-4"
         style={{ paddingTop: `calc(env(safe-area-inset-top, 0px) + 12px)`, paddingBottom: 12 }}>
         <h1 className="text-lg font-bold text-text">❤️ Care Guide</h1>
@@ -99,6 +96,6 @@ export default function Care() {
           ))}
         </div>
       </div>
-    </motion.div>
+    </TabPage>
   )
 }

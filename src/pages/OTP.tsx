@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { StackPage } from '../components/PageTransition'
 import { ChevronLeft } from 'lucide-react'
 import { useApp } from '../lib/store'
 
@@ -55,11 +55,7 @@ export default function OTP() {
   }
 
   return (
-    <motion.div
-      className="fixed inset-0 flex flex-col bg-bg"
-      initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
-      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-    >
+    <StackPage className="flex flex-col bg-bg">
       {/* Back */}
       <button
         onClick={() => navigate('/phone')}
@@ -119,6 +115,6 @@ export default function OTP() {
           )}
         </div>
       </div>
-    </motion.div>
+    </StackPage>
   )
 }

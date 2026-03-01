@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Camera, MapPin } from 'lucide-react'
 import { PHYSICAL_MARKERS, MARKER_GROUPS } from '../lib/markers'
+import { StackPage } from '../components/PageTransition'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { useApp } from '../lib/store'
@@ -134,10 +135,7 @@ export default function Register() {
   }
 
   return (
-    <motion.div
-      className="fixed inset-0 flex flex-col bg-bg"
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-    >
+    <StackPage className="flex flex-col bg-bg">
       {/* Header */}
       <div className="bg-white border-b border-border px-4 flex items-center"
         style={{ paddingTop: `calc(env(safe-area-inset-top, 0px) + 12px)`, paddingBottom: 12 }}>
@@ -297,6 +295,6 @@ export default function Register() {
           By submitting, you confirm this is an accurate report.
         </p>
       </div>
-    </motion.div>
+    </StackPage>
   )
 }

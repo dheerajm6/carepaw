@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
+import { StackPage } from '../components/PageTransition'
 import { ChevronLeft, Plus, Camera, Video, X, Clock, AlertTriangle, Sparkles, Loader2 } from 'lucide-react'
 import { doc, getDoc, collection, addDoc, getDocs, orderBy, query, serverTimestamp } from 'firebase/firestore'
 import { db } from '../lib/firebase'
@@ -206,11 +207,7 @@ export default function DogProfile() {
 
   return (
     <>
-      <motion.div
-        className="fixed inset-0 flex flex-col bg-bg overflow-y-auto"
-        initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      >
+      <StackPage className="flex flex-col bg-bg overflow-y-auto">
         {/* ── Hero photo ── */}
         <div className="relative h-72 bg-bg flex-shrink-0">
           {dog.photoURL
@@ -443,7 +440,7 @@ export default function DogProfile() {
             <Plus size={18} /> Log Observation
           </button>
         </div>
-      </motion.div>
+      </StackPage>
 
       {/* ── Observation modal ── */}
       <AnimatePresence>
@@ -456,7 +453,7 @@ export default function DogProfile() {
             <motion.div
               className="bg-bg rounded-t-[24px] flex flex-col max-h-[92vh]"
               initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              transition={{ type: 'spring', stiffness: 420, damping: 42, mass: 0.85 }}
             >
               {/* Handle bar */}
               <div className="flex justify-center pt-3 pb-1">

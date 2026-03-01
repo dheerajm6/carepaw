@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { TabPage } from '../components/PageTransition'
 import { MapContainer, TileLayer, Circle, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import { List, Map as MapIcon, LocateFixed, Plus } from 'lucide-react'
@@ -155,10 +155,7 @@ export default function Discover() {
   )
 
   return (
-    <motion.div
-      className="fixed inset-0 flex flex-col"
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-    >
+    <TabPage className="flex flex-col">
       {/* ── Header ── */}
       <div
         className="bg-white border-b border-border px-4 flex items-center justify-between z-10 flex-shrink-0"
@@ -415,6 +412,6 @@ export default function Discover() {
           )}
         </div>
       )}
-    </motion.div>
+    </TabPage>
   )
 }

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { TabPage } from '../components/PageTransition'
 import { signInWithPhoneNumber, RecaptchaVerifier } from 'firebase/auth'
 import { auth } from '../lib/firebase'
 import { useApp } from '../lib/store'
@@ -44,10 +44,7 @@ export default function Phone() {
   }
 
   return (
-    <motion.div
-      className="fixed inset-0 flex flex-col bg-bg"
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-    >
+    <TabPage className="flex flex-col bg-bg">
       {/* Header */}
       <div className="bg-primary px-6 pt-16 pb-10 flex flex-col items-center gap-3">
         <div className="w-16 h-16 bg-accent rounded-2xl flex items-center justify-center">
@@ -100,6 +97,6 @@ export default function Phone() {
       </div>
 
       <div id="recaptcha-anchor" />
-    </motion.div>
+    </TabPage>
   )
 }

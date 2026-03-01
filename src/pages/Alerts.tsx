@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { TabPage } from '../components/PageTransition'
 import { collection, query, where, getDocs, orderBy } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { useApp } from '../lib/store'
@@ -44,10 +44,7 @@ export default function Alerts() {
   }, [])
 
   return (
-    <motion.div
-      className="fixed inset-0 flex flex-col bg-bg"
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-    >
+    <TabPage className="flex flex-col bg-bg">
       <div className="bg-white border-b border-border px-4"
         style={{ paddingTop: `calc(env(safe-area-inset-top, 0px) + 12px)`, paddingBottom: 12 }}>
         <h1 className="text-lg font-bold text-text">🔔 Alerts</h1>
@@ -115,6 +112,6 @@ export default function Alerts() {
           </div>
         </div>
       </div>
-    </motion.div>
+    </TabPage>
   )
 }

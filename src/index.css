@@ -3,9 +3,53 @@
 @tailwind utilities;
 
 @layer base {
-  * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+  * {
+    -webkit-tap-highlight-color: transparent;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
   html, body, #root { height: 100%; }
-  body { background: #F9F6F0; overscroll-behavior: none; }
+  body {
+    background: #F9F6F0;
+    overscroll-behavior: none;
+    /* Prevent iOS text size adjustment on orientation change */
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* iOS-style momentum scrolling on all scrollable containers */
+  .overflow-y-auto,
+  .overflow-y-scroll,
+  .overflow-x-auto,
+  .overflow-x-scroll {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+  }
+
+  /* Hide scrollbars but keep scroll functionality */
+  .overflow-y-auto::-webkit-scrollbar,
+  .overflow-y-scroll::-webkit-scrollbar {
+    display: none;
+  }
+  .overflow-y-auto,
+  .overflow-y-scroll {
+    scrollbar-width: none;
+  }
+
+  /* Prevent layout shift when content is in motion */
+  .fixed { backface-visibility: hidden; }
+
+  /* Improve button press feel — all interactive elements */
+  button, a, [role="button"] {
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* Reduce motion for accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
 }
 
 @layer components {
@@ -14,11 +58,14 @@
   }
   .ios-btn-primary {
     @apply w-full py-4 rounded-ios-lg bg-primary text-white font-semibold text-base
-           active:opacity-80 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed;
+           active:scale-[0.97] active:brightness-90
+           transition-[transform,filter] duration-[80ms] ease-out
+           disabled:opacity-40 disabled:cursor-not-allowed;
   }
   .ios-btn-ghost {
     @apply w-full py-4 rounded-ios-lg border border-border bg-white text-text font-semibold text-base
-           active:opacity-70 transition-opacity;
+           active:scale-[0.97] active:bg-bg
+           transition-[transform,background] duration-[80ms] ease-out;
   }
   .ios-input {
     @apply w-full px-4 py-3.5 rounded-ios-lg border border-border bg-white text-text text-base
@@ -26,8 +73,9 @@
   }
   .chip {
     @apply flex items-center gap-1.5 px-4 py-2 rounded-full border border-border bg-white
-           text-sm font-medium text-muted cursor-pointer transition-all select-none
-           active:scale-95;
+           text-sm font-medium text-muted cursor-pointer select-none
+           active:scale-[0.94] active:brightness-95
+           transition-[transform,filter] duration-[80ms] ease-out;
   }
   .chip-active {
     @apply border-primary bg-primary/10 text-primary font-semibold;
