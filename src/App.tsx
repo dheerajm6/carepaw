@@ -77,19 +77,49 @@ export default function App() {
     return unsub
   }, [])
 
-  // Watch real GPS — high accuracy, live updates
+  // GPS — two-phase strategy:
+  // Phase 1: fast low-accuracy fix (WiFi/IP) so the app isn't stuck waiting
+  // Phase 2: high-accuracy watch for continuous refinement (real GPS chip)
+  // If high-accuracy times out, low-accuracy position is already in state.
   useEffect(() => {
     if (!navigator.geolocation) return
-    const id = navigator.geolocation.watchPosition(
-      (pos) => setCoords({
+
+    const onPosition = (pos: GeolocationPosition) => {
+      setCoords({
         lat: pos.coords.latitude,
         lng: pos.coords.longitude,
         accuracy: pos.coords.accuracy,
-      }),
-      () => {},
-      { enableHighAccuracy: true, maximumAge: 0, timeout: 30000 },
-    )
-    return () => navigator.geolocation.clearWatch(id)
+      })
+    }
+
+    const onError = (err: GeolocationPositionError) => {
+      // PERMISSION_DENIED (code 1) — user blocked location, nothing more we can do
+      if (err.code === 1) return
+
+      // TIMEOUT (code 3) or POSITION_UNAVAILABLE (code 2):
+      // fall back to a low-accuracy single fix
+      navigator.geolocation.getCurrentPosition(
+        onPosition,
+        () => {},   // if low-accuracy also fails, give up gracefully
+        { enableHighAccuracy: false, timeout: 15000, maximumAge: 60000 },
+      )
+    }
+
+    // Phase 1 — quick coarse fix (no high-accuracy request, usually instant)
+    navigator.geolocation.getCurrentPosition(onPosition, () => {}, {
+      enableHighAccuracy: false,
+      timeout: 10000,
+      maximumAge: 30000,
+    })
+
+    // Phase 2 — high-accuracy watch (GPS chip, refines over time)
+    const watchId = navigator.geolocation.watchPosition(onPosition, onError, {
+      enableHighAccuracy: true,
+      maximumAge: 0,
+      timeout: 20000,
+    })
+
+    return () => navigator.geolocation.clearWatch(watchId)
   }, [])
 
   if (!splashDone) return <Splash onDone={() => setSplashDone(true)} />
