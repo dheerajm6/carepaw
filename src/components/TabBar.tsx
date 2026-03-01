@@ -1,12 +1,12 @@
 import { NavLink } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Map, PawPrint, Heart, Bell } from 'lucide-react'
+import { Map, PawPrint, Heart, LifeBuoy } from 'lucide-react'
 
 const tabs = [
   { to: '/discover', icon: Map,      label: 'Discover' },
   { to: '/register', icon: PawPrint, label: 'Register' },
   { to: '/care',     icon: Heart,    label: 'Care'     },
-  { to: '/alerts',   icon: Bell,     label: 'Alerts'   },
+  { to: '/alerts',   icon: LifeBuoy, label: 'Help'     },
 ]
 
 export default function TabBar() {
