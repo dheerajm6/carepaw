@@ -4,6 +4,9 @@ node_modules/
 # Build output
 dist/
 
+# TypeScript compiled output (src/**/*.js emitted by tsc)
+src/**/*.js
+
 # Environment variables (never commit secrets)
 .env
 .env.local
