@@ -1,0 +1,67 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ─── Helpers ────────────────────────────────────────────────────────────
+
+    function isAuthed() {
+      return request.auth != null;
+    }
+
+    function isImage() {
+      return request.resource.contentType.matches('image/.*');
+    }
+
+    function isVideo() {
+      return request.resource.contentType.matches('video/.*');
+    }
+
+    function isImageOrVideo() {
+      return isImage() || isVideo();
+    }
+
+    function underMB(mb) {
+      return request.resource.size < mb * 1024 * 1024;
+    }
+
+    // ─── Dog profile photos ──────────────────────────────────────────────────
+    // Path: dogs/{timestamp}_{uid}.jpg
+
+    match /dogs/{fileName} {
+      // Any auth user can read dog photos
+      allow read: if isAuthed();
+
+      // Only auth users can upload; must be an image under 10 MB
+      allow write: if isAuthed()
+        && isImage()
+        && underMB(10)
+        // Enforce filename contains the uploader's UID
+        && fileName.matches('.*' + request.auth.uid + '.*');
+
+      allow delete: if isAuthed()
+        && fileName.matches('.*' + request.auth.uid + '.*');
+    }
+
+    // ─── Observation media ───────────────────────────────────────────────────
+    // Path: observations/{dogId}/{timestamp}_{uid}.jpg  (or .mp4)
+
+    match /observations/{dogId}/{fileName} {
+      // Any auth user can read observation media
+      allow read: if isAuthed();
+
+      // Auth users can upload images (10 MB) or videos (100 MB)
+      allow write: if isAuthed()
+        && isImageOrVideo()
+        && (
+          (isImage() && underMB(10))
+          ||
+          (isVideo() && underMB(100))
+        )
+        && fileName.matches('.*' + request.auth.uid + '.*');
+
+      allow delete: if isAuthed()
+        && fileName.matches('.*' + request.auth.uid + '.*');
+    }
+  }
+}

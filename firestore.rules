@@ -1,0 +1,135 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Helpers ────────────────────────────────────────────────────────────
+
+    function isAuthed() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return request.auth.uid == uid;
+    }
+
+    function isValidDogStatus(status) {
+      return status in ['safe', 'caution', 'alert'];
+    }
+
+    function isValidObsType(type) {
+      return type in ['health', 'aggression', 'bite', 'injury', 'feeding'];
+    }
+
+    function isValidTemperament(t) {
+      return t in ['friendly', 'neutral', 'alert'];
+    }
+
+    function isValidYNU(v) {
+      return v in ['yes', 'no', 'unknown'];
+    }
+
+    // ─── Dogs ───────────────────────────────────────────────────────────────
+
+    match /dogs/{dogId} {
+
+      // Any authenticated user can read dog profiles
+      allow read: if isAuthed();
+
+      // Any authenticated user can register a new dog
+      allow create: if isAuthed()
+        && request.resource.data.registeredBy == request.auth.uid
+        && request.resource.data.keys().hasAll([
+             'name', 'photoURL', 'latitude', 'longitude',
+             'gender', 'size', 'vaccinated', 'sterilized',
+             'temperament', 'status', 'riskScore',
+             'biteCount', 'observationCount', 'aggressionConfirmations',
+             'registeredBy'
+           ])
+        && request.resource.data.latitude  is number
+        && request.resource.data.longitude is number
+        && request.resource.data.riskScore is number
+        && isValidDogStatus(request.resource.data.status)
+        && isValidTemperament(request.resource.data.temperament)
+        && isValidYNU(request.resource.data.vaccinated)
+        && isValidYNU(request.resource.data.sterilized)
+        // tagId is optional but if present must be a non-empty string ≤ 30 chars
+        && (!('tagId' in request.resource.data)
+            || (request.resource.data.tagId is string
+                && request.resource.data.tagId.size() > 0
+                && request.resource.data.tagId.size() <= 30));
+
+      // Only the registering user can update core profile fields.
+      // Any auth user can increment counters (observationCount, biteCount, etc.)
+      allow update: if isAuthed() && (
+        // Owner can update anything
+        isOwner(resource.data.registeredBy)
+        ||
+        // Community members can only bump counters and risk fields
+        (
+          request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['riskScore', 'status', 'biteCount', 'observationCount', 'aggressionConfirmations'])
+          && request.resource.data.riskScore  is number
+          && request.resource.data.biteCount  is number
+          && request.resource.data.observationCount is number
+          && request.resource.data.aggressionConfirmations is number
+          && isValidDogStatus(request.resource.data.status)
+        )
+      );
+
+      // Only the original registrar can delete
+      allow delete: if isAuthed() && isOwner(resource.data.registeredBy);
+
+      // ─── Observations (sub-collection) ──────────────────────────────────
+
+      match /observations/{obsId} {
+
+        // Any auth user can read observations for a dog
+        allow read: if isAuthed();
+
+        // Any auth user can log an observation
+        allow create: if isAuthed()
+          && request.resource.data.reportedBy == request.auth.uid
+          && request.resource.data.keys().hasAll([
+               'dogId', 'type', 'description', 'reportedBy',
+               'confirmed', 'confirmations'
+             ])
+          && isValidObsType(request.resource.data.type)
+          && request.resource.data.description is string
+          && request.resource.data.description.size() > 0
+          && request.resource.data.description.size() <= 1000
+          && request.resource.data.confirmations is number
+          && request.resource.data.confirmed     is bool;
+
+        // Only the reporter can update their own observation
+        allow update: if isAuthed() && isOwner(resource.data.reportedBy);
+
+        // Only the reporter can delete their own observation
+        allow delete: if isAuthed() && isOwner(resource.data.reportedBy);
+      }
+    }
+
+    // ─── Alerts ─────────────────────────────────────────────────────────────
+
+    match /alerts/{alertId} {
+      // All auth users can read alerts
+      allow read: if isAuthed();
+
+      // Alerts are created server-side (Cloud Functions).
+      // Allow client-side creation for now (Phase 1 — no Cloud Functions yet).
+      allow create: if isAuthed()
+        && request.resource.data.keys().hasAll([
+             'dogId', 'dogName', 'level', 'reason', 'resolved'
+           ])
+        && request.resource.data.level in ['medium', 'high', 'critical']
+        && request.resource.data.resolved is bool;
+
+      // Only allow marking resolved = true (no other field changes)
+      allow update: if isAuthed()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['resolved'])
+        && request.resource.data.resolved == true;
+
+      allow delete: if false; // alerts are never deleted, only resolved
+    }
+  }
+}
