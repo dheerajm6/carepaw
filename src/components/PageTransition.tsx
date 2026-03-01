@@ -3,12 +3,15 @@ import { useNavDirection } from '../lib/navigation'
 
 // iOS-tuned spring: fast, tight, no overshoot
 const SPRING = { type: 'spring' as const, stiffness: 420, damping: 42, mass: 0.85 }
-const FADE   = { duration: 0.16, ease: [0.25, 0.1, 0.25, 1] as any }
+const FADE   = { duration: 0.16, ease: [0.25, 0.1, 0.25, 1] as const }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Variant = { initial: any; animate: any; exit: any; transition: any }
 
 // ── Stack page (detail screens pushed onto the nav stack) ─────────────────────
 // push → slides in from right; the tab page behind it recedes to the left
 // pop  → slides out to right;  the tab page behind it returns from the left
-const STACK: Record<string, { initial: object; animate: object; exit: object; transition: object }> = {
+const STACK: Record<string, Variant> = {
   push: {
     initial:    { x: '100%' },
     animate:    { x: 0 },
@@ -36,10 +39,7 @@ const STACK: Record<string, { initial: object; animate: object; exit: object; tr
 }
 
 // ── Tab page (screens that live in the bottom tab bar) ────────────────────────
-// push → recedes to the left as a stack page pushes over it
-// pop  → slides back from the left as a stack page pops off
-// tab  → fades in (iOS-style instant tab switch)
-const TAB: Record<string, { initial: object; animate: object; exit: object; transition: object }> = {
+const TAB: Record<string, Variant> = {
   push: {
     initial:    { x: 0, opacity: 1 },          // already visible, no entry needed
     animate:    { x: 0, opacity: 1 },
